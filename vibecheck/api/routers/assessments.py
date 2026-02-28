@@ -1,5 +1,3 @@
-import asyncio
-
 from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,20 +14,11 @@ from api.schemas.assessment import (
 )
 from api.schemas.pagination import PaginationMeta
 from api.services.lightweight_scanner import run_lightweight_scan
+from api.services.robust_scanner import run_robust_scan
 from api.utils.errors import VibeCheckError
 from api.utils.pagination import paginate
 
 router = APIRouter(tags=["Assessments"])
-
-
-async def _placeholder_robust_task(assessment_id: str, db_factory):
-    """Placeholder for robust scanning (implemented in a later prompt)."""
-    await asyncio.sleep(2)
-    async with db_factory() as db:
-        assessment = await db.get(Assessment, assessment_id)
-        if assessment:
-            assessment.status = "complete"
-            await db.commit()
 
 
 @router.post(
@@ -43,7 +32,6 @@ async def create_assessment(
     db: AsyncSession = Depends(get_db),
 ):
     from api.database import async_sessionmaker_factory
-    from api.services.tunnel_manager import tunnel_manager
 
     if body.idempotency_key:
         q = select(Assessment).where(
@@ -56,19 +44,11 @@ async def create_assessment(
                 raise VibeCheckError.duplicate_idempotency_key()
             return AssessmentResponse.model_validate(existing)
 
-    if body.mode == "robust" and body.tunnel_session_id:
-        from api.models.tunnel_session import TunnelSession
-
-        session = await db.get(TunnelSession, body.tunnel_session_id)
-        if not session or session.status != "connected":
-            raise VibeCheckError.tunnel_not_connected()
-        if not tunnel_manager.is_connected(body.tunnel_session_id):
-            raise VibeCheckError.tunnel_not_connected()
-
     assessment = Assessment(
         mode=body.mode,
         status="queued",
         repo_url=body.repo_url,
+        target_url=body.target_url,
         tunnel_session_id=body.tunnel_session_id,
         agents=body.agents,
         depth=body.depth,
@@ -88,9 +68,12 @@ async def create_assessment(
         )
     else:
         background_tasks.add_task(
-            _placeholder_robust_task,
-            assessment.id,
-            async_sessionmaker_factory,
+            run_robust_scan,
+            assessment_id=assessment.id,
+            target_url=body.target_url,
+            agent_names=body.agents,
+            depth=body.depth,
+            db_factory=async_sessionmaker_factory,
         )
 
     return AssessmentResponse.model_validate(assessment)
@@ -206,9 +189,12 @@ async def rerun_assessment(
         )
     else:
         background_tasks.add_task(
-            _placeholder_robust_task,
-            assessment.id,
-            async_sessionmaker_factory,
+            run_robust_scan,
+            assessment_id=assessment.id,
+            target_url=assessment.target_url,
+            agent_names=assessment.agents or ["recon", "auth", "injection", "config"],
+            depth=assessment.depth,
+            db_factory=async_sessionmaker_factory,
         )
 
     return AssessmentResponse.model_validate(assessment)

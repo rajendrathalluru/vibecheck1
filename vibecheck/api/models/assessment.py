@@ -17,6 +17,7 @@ class Assessment(Base):
     mode: Mapped[str] = mapped_column(String, nullable=False)
     status: Mapped[str] = mapped_column(String, default="queued", nullable=False)
     repo_url: Mapped[str | None] = mapped_column(String, nullable=True)
+    target_url: Mapped[str | None] = mapped_column(String, nullable=True)
     tunnel_session_id: Mapped[str | None] = mapped_column(String, nullable=True)
     agents: Mapped[list | None] = mapped_column(JSON, nullable=True)
     depth: Mapped[str] = mapped_column(String, default="standard", nullable=False)

@@ -15,6 +15,7 @@ class CreateAssessmentRequest(BaseModel):
     mode: Literal["lightweight", "robust"]
     repo_url: str | None = None
     files: list[FileUpload] | None = None
+    target_url: str | None = None
     tunnel_session_id: str | None = None
     agents: list[str] = ["recon", "auth", "injection", "config"]
     depth: Literal["quick", "standard", "deep"] = "standard"
@@ -24,13 +25,17 @@ class CreateAssessmentRequest(BaseModel):
     def validate_mode_fields(self):
         if self.mode == "lightweight" and not self.repo_url and not self.files:
             raise ValueError("Lightweight mode requires either 'repo_url' or 'files'")
-        if self.mode == "robust" and not self.tunnel_session_id:
-            raise ValueError("Robust mode requires 'tunnel_session_id'")
+        if self.mode == "robust" and not self.target_url:
+            raise ValueError("Robust mode requires 'target_url'")
         if self.mode == "robust":
             valid_agents = {"recon", "auth", "injection", "config"}
+            if not self.agents:
+                raise ValueError("At least one agent is required")
             for a in self.agents:
                 if a not in valid_agents:
-                    raise ValueError(f"Unknown agent: {a}")
+                    raise ValueError(
+                        f"Unknown agent: '{a}'. Valid agents: {', '.join(sorted(valid_agents))}"
+                    )
         return self
 
     model_config = ConfigDict(
@@ -42,7 +47,7 @@ class CreateAssessmentRequest(BaseModel):
                 },
                 {
                     "mode": "robust",
-                    "tunnel_session_id": "tun_a1b2c3d4e5f6",
+                    "target_url": "https://my-app.fly.dev",
                     "agents": ["recon", "auth", "injection", "config"],
                     "depth": "standard",
                 },
@@ -76,6 +81,7 @@ class AssessmentResponse(BaseModel):
     mode: str
     status: str
     repo_url: str | None = None
+    target_url: str | None = None
     tunnel_session_id: str | None = None
     agents: list[str] | None = None
     depth: str
