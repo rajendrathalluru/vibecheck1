@@ -1,9 +1,11 @@
 import uuid
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from fastapi.staticfiles import StaticFiles
 
 from api.database import create_tables
 from api.routers import health, assessments, findings, logs, agents, tunnel, memory
@@ -72,3 +74,9 @@ app.include_router(memory.router)
 @app.on_event("startup")
 async def startup():
     await create_tables()
+
+
+# Serve frontend dashboard from the same deployment when available.
+_frontend_dir = Path(__file__).resolve().parents[2] / "frontend"
+if _frontend_dir.exists():
+    app.mount("/", StaticFiles(directory=str(_frontend_dir), html=True), name="frontend")

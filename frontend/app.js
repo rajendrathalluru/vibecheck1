@@ -909,6 +909,11 @@ function setupEvents() {
 }
 
 async function boot() {
+  const isLocalHost = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+  if (!isLocalHost && els.apiBase.value.trim() === "http://localhost:8000") {
+    els.apiBase.value = window.location.origin;
+  }
+
   setupEvents();
   setCreateModeUI();
 

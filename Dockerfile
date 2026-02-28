@@ -15,6 +15,7 @@ RUN apt-get update \
 
 COPY vibecheck/pyproject.toml ./pyproject.toml
 COPY vibecheck/api ./api
+COPY frontend /app/frontend
 
 RUN python -m pip install --upgrade pip \
     && python -m pip install .
