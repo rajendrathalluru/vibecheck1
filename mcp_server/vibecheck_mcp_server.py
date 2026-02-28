@@ -19,6 +19,7 @@ from mcp.server.fastmcp import FastMCP
 
 API_BASE = os.getenv("VIBECHECK_API_BASE", "http://127.0.0.1:8000").rstrip("/")
 TIMEOUT_SECONDS = float(os.getenv("VIBECHECK_TIMEOUT_SECONDS", "30"))
+DEFAULT_PORT = int(os.getenv("PORT", "8000"))
 
 mcp = FastMCP("VibeCheck MCP")
 
@@ -231,7 +232,7 @@ def main() -> None:
     parser.add_argument(
         "--port",
         type=int,
-        default=int(os.getenv("MCP_PORT", "8787")),
+        default=int(os.getenv("MCP_PORT", str(DEFAULT_PORT))),
         help="Port for HTTP/SSE transports",
     )
     parser.add_argument(
