@@ -11,7 +11,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-COPY mcp_server/vibecheck_mcp_server.py /app/vibecheck_mcp_server.py
+COPY vibecheck_mcp_server.py /app/vibecheck_mcp_server.py
 
 RUN python -m pip install --upgrade pip \
     && python -m pip install mcp httpx
