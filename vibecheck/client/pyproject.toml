@@ -1,0 +1,7 @@
+[project]
+name = "vibecheck-client"
+version = "1.0.0"
+dependencies = ["websockets", "httpx"]
+
+[project.scripts]
+vibecheck = "vibecheck_client.cli:main"
