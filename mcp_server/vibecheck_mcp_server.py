@@ -15,16 +15,38 @@ from typing import Any, Literal
 
 import httpx
 from mcp.server.fastmcp import FastMCP
-from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 import uvicorn
 
 
 API_BASE = os.getenv("VIBECHECK_API_BASE", "http://127.0.0.1:8000").rstrip("/")
 TIMEOUT_SECONDS = float(os.getenv("VIBECHECK_TIMEOUT_SECONDS", "30"))
+DEFAULT_HOST = os.getenv("MCP_HOST", "127.0.0.1")
 DEFAULT_PORT = int(os.getenv("PORT", "8000"))
+DEFAULT_PATH = os.getenv("MCP_PATH", "/mcp")
 
-mcp = FastMCP("VibeCheck MCP")
+mcp = FastMCP(
+    "VibeCheck MCP",
+    host=DEFAULT_HOST,
+    port=DEFAULT_PORT,
+    streamable_http_path=DEFAULT_PATH,
+)
+
+
+@mcp.custom_route("/", methods=["GET"])
+async def root(_request):
+    return JSONResponse(
+        {
+            "service": "vibecheck-mcp",
+            "transport": os.getenv("MCP_TRANSPORT", "stdio"),
+            "endpoint": DEFAULT_PATH,
+        }
+    )
+
+
+@mcp.custom_route("/healthz", methods=["GET"])
+async def healthz(_request):
+    return JSONResponse({"status": "ok"})
 
 
 async def _api_request(
@@ -229,7 +251,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--host",
-        default=os.getenv("MCP_HOST", "127.0.0.1"),
+        default=DEFAULT_HOST,
         help="Host for HTTP/SSE transports",
     )
     parser.add_argument(
@@ -240,7 +262,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--path",
-        default=os.getenv("MCP_PATH", "/mcp"),
+        default=DEFAULT_PATH,
         help="Path for Streamable HTTP transport",
     )
     args = parser.parse_args()
@@ -248,47 +270,12 @@ def main() -> None:
     # For HTTP transports, run with uvicorn so host/port are always honored
     # across MCP SDK versions.
     if args.transport == "streamable-http":
-        mcp_app = mcp.streamable_http_app()
-        app = Starlette()
-
-        @app.route("/", methods=["GET"])
-        async def root(_request):
-            return JSONResponse(
-                {
-                    "service": "vibecheck-mcp",
-                    "transport": "streamable-http",
-                    "endpoint": "/mcp",
-                }
-            )
-
-        @app.route("/healthz", methods=["GET"])
-        async def healthz(_request):
-            return JSONResponse({"status": "ok"})
-
-        app.mount("/", mcp_app)
-        uvicorn.run(app, host=args.host, port=args.port)
+        mcp.settings.streamable_http_path = args.path
+        uvicorn.run(mcp.streamable_http_app(), host=args.host, port=args.port)
         return
 
     if args.transport == "sse":
-        sse_app = mcp.sse_app(mount_path=args.path)
-        app = Starlette()
-
-        @app.route("/", methods=["GET"])
-        async def root(_request):
-            return JSONResponse(
-                {
-                    "service": "vibecheck-mcp",
-                    "transport": "sse",
-                    "endpoint": args.path,
-                }
-            )
-
-        @app.route("/healthz", methods=["GET"])
-        async def healthz(_request):
-            return JSONResponse({"status": "ok"})
-
-        app.mount("/", sse_app)
-        uvicorn.run(app, host=args.host, port=args.port)
+        uvicorn.run(mcp.sse_app(mount_path=args.path), host=args.host, port=args.port)
         return
 
     # stdio mode
