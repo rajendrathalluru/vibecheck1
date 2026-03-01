@@ -107,14 +107,26 @@ class BaseAgent:
 
     name: str = "base"
 
-    def __init__(self, assessment_id: str, target_url: str, depth: str, db_session):
+    def __init__(
+        self,
+        assessment_id: str,
+        target_url: str,
+        depth: str,
+        db_session,
+        coverage_context: dict | None = None,
+    ):
         self.assessment_id = assessment_id
         self.target_url = target_url.rstrip("/")
         self.depth = depth
-        self.max_steps = {"quick": 5, "standard": 15, "deep": 30}.get(depth, 15)
+        self.max_steps = {"quick": 10, "standard": 28, "deep": 55}.get(depth, 28)
+        self.max_http_requests = {"quick": 30, "standard": 85, "deep": 170}.get(depth, 85)
+        self.per_path_limit = {"quick": 2, "standard": 3, "deep": 4}.get(depth, 3)
         self.db = db_session
         self.findings: list[Finding] = []
         self.step_count = 0
+        self.http_request_count = 0
+        self.path_attempts: dict[str, int] = {}
+        self.coverage_context = coverage_context or {}
         self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
         self.model = settings.GEMINI_MODEL or "gemini-2.5-flash"
 
@@ -123,9 +135,14 @@ class BaseAgent:
         initial_message = (
             f"Target URL: {self.target_url}\n"
             f"Max steps: {self.max_steps}\n"
+            f"Max HTTP requests: {self.max_http_requests}\n"
             f"Depth: {self.depth}\n\n"
+            f"Discovered seed paths: {json.dumps(self.coverage_context.get('seed_paths', [])[:60])}\n"
+            f"Reachable paths (status): {json.dumps(self.coverage_context.get('reachable_paths', [])[:60])}\n"
+            f"Interesting request samples: {json.dumps(self.coverage_context.get('request_samples', [])[:20])}\n\n"
             f"Begin your security assessment. Use your tools to probe the target. "
-            f"Call report_finding for each confirmed vulnerability with evidence."
+            f"Call report_finding for each confirmed vulnerability with evidence.\n"
+            f"Prioritize breadth first: cover distinct endpoints and input points before deep repetition."
         )
 
         contents = [types.Content(role="user", parts=[types.Part(text=initial_message)])]
@@ -181,6 +198,32 @@ class BaseAgent:
             path = args.get("path", "/")
             headers = args.get("headers")
             body = args.get("body")
+
+            if not path.startswith("/"):
+                path = f"/{path}"
+
+            if self.http_request_count >= self.max_http_requests:
+                return {
+                    "error": "request_budget_exceeded",
+                    "message": (
+                        f"Request budget exceeded for this agent "
+                        f"({self.max_http_requests}). Prioritize reporting findings."
+                    ),
+                }
+
+            path_key = f"{method.upper()} {path}"
+            prior_attempts = self.path_attempts.get(path_key, 0)
+            if prior_attempts >= self.per_path_limit:
+                return {
+                    "error": "path_attempt_limit_reached",
+                    "message": (
+                        f"Path attempt limit reached for {path_key}. "
+                        "Try a different endpoint or attack path."
+                    ),
+                }
+
+            self.path_attempts[path_key] = prior_attempts + 1
+            self.http_request_count += 1
 
             result = await http_request(self.target_url, method, path, headers, body)
             await self._log_step(
