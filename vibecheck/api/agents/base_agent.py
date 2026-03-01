@@ -106,6 +106,7 @@ class BaseAgent:
     """
 
     name: str = "base"
+    MAX_MODEL_HISTORY_ITEMS = 18
 
     def __init__(
         self,
@@ -129,6 +130,7 @@ class BaseAgent:
         self.coverage_context = coverage_context or {}
         self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
         self.model = settings.GEMINI_MODEL or "gemini-2.5-flash"
+        self.max_model_body_preview = {"quick": 600, "standard": 900, "deep": 1200}.get(depth, 900)
 
     async def run(self) -> list[Finding]:
         system_prompt = self._get_system_prompt()
@@ -148,6 +150,7 @@ class BaseAgent:
         contents = [types.Content(role="user", parts=[types.Part(text=initial_message)])]
 
         while self.step_count < self.max_steps:
+            self._compact_contents(contents)
             try:
                 response = await self.client.aio.models.generate_content(
                     model=self.model,
@@ -159,7 +162,21 @@ class BaseAgent:
                     ),
                 )
             except Exception as e:
-                raise RuntimeError(f"[{self.name}] Gemini generate_content failed: {e}") from e
+                # Retry once with aggressively compacted history for context/token overflows.
+                message = str(e).lower()
+                if any(k in message for k in ["token", "context", "too large", "request too large"]):
+                    self._compact_contents(contents, aggressive=True)
+                    response = await self.client.aio.models.generate_content(
+                        model=self.model,
+                        contents=contents,
+                        config=types.GenerateContentConfig(
+                            system_instruction=system_prompt,
+                            tools=AGENT_TOOLS,
+                            temperature=0.2,
+                        ),
+                    )
+                else:
+                    raise RuntimeError(f"[{self.name}] Gemini generate_content failed: {e}") from e
 
             candidate = response.candidates[0] if response.candidates else None
             if not candidate or not candidate.content or not candidate.content.parts:
@@ -226,6 +243,11 @@ class BaseAgent:
             self.http_request_count += 1
 
             result = await http_request(self.target_url, method, path, headers, body)
+            model_result = dict(result)
+            body_preview = model_result.get("body_preview")
+            if isinstance(body_preview, str):
+                model_result["body_preview"] = body_preview[: self.max_model_body_preview]
+
             await self._log_step(
                 action=f"{method} {path}",
                 target=path,
@@ -234,7 +256,7 @@ class BaseAgent:
                 response_preview=result.get("body_preview", result.get("message", ""))[:500],
                 reasoning=f"Probing {path} with {method}",
             )
-            return result
+            return model_result
 
         elif name == "check_headers":
             path = args.get("path", "/")
@@ -254,6 +276,18 @@ class BaseAgent:
             return {"status": "finding_reported", "finding_id": finding.id}
 
         return {"error": f"Unknown tool: {name}"}
+
+    def _compact_contents(self, contents: list[types.Content], aggressive: bool = False):
+        """
+        Keep initial context and recent turns only to prevent model context bloat.
+        """
+        if len(contents) <= self.MAX_MODEL_HISTORY_ITEMS:
+            return
+
+        keep_items = 10 if aggressive else self.MAX_MODEL_HISTORY_ITEMS
+        initial = contents[:1]
+        recent = contents[-(keep_items - 1):]
+        contents[:] = initial + recent
 
     async def _log_step(
         self,
