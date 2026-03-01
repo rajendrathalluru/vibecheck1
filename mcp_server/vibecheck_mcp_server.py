@@ -15,6 +15,9 @@ from typing import Any, Literal
 
 import httpx
 from mcp.server.fastmcp import FastMCP
+from starlette.applications import Starlette
+from starlette.responses import JSONResponse
+import uvicorn
 
 
 API_BASE = os.getenv("VIBECHECK_API_BASE", "http://127.0.0.1:8000").rstrip("/")
@@ -242,19 +245,55 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    # Support multiple MCP SDK versions by passing only supported kwargs.
-    run_sig = inspect.signature(mcp.run)
-    kwargs: dict[str, Any] = {}
-    if "transport" in run_sig.parameters:
-        kwargs["transport"] = args.transport
-    if args.transport != "stdio":
-        if "host" in run_sig.parameters:
-            kwargs["host"] = args.host
-        if "port" in run_sig.parameters:
-            kwargs["port"] = args.port
-        if "path" in run_sig.parameters and args.transport == "streamable-http":
-            kwargs["path"] = args.path
+    # For HTTP transports, run with uvicorn so host/port are always honored
+    # across MCP SDK versions.
+    if args.transport == "streamable-http":
+        mcp_app = mcp.streamable_http_app()
+        app = Starlette()
 
+        @app.route("/", methods=["GET"])
+        async def root(_request):
+            return JSONResponse(
+                {
+                    "service": "vibecheck-mcp",
+                    "transport": "streamable-http",
+                    "endpoint": "/mcp",
+                }
+            )
+
+        @app.route("/healthz", methods=["GET"])
+        async def healthz(_request):
+            return JSONResponse({"status": "ok"})
+
+        app.mount("/", mcp_app)
+        uvicorn.run(app, host=args.host, port=args.port)
+        return
+
+    if args.transport == "sse":
+        sse_app = mcp.sse_app(mount_path=args.path)
+        app = Starlette()
+
+        @app.route("/", methods=["GET"])
+        async def root(_request):
+            return JSONResponse(
+                {
+                    "service": "vibecheck-mcp",
+                    "transport": "sse",
+                    "endpoint": args.path,
+                }
+            )
+
+        @app.route("/healthz", methods=["GET"])
+        async def healthz(_request):
+            return JSONResponse({"status": "ok"})
+
+        app.mount("/", sse_app)
+        uvicorn.run(app, host=args.host, port=args.port)
+        return
+
+    # stdio mode
+    run_sig = inspect.signature(mcp.run)
+    kwargs: dict[str, Any] = {"transport": "stdio"} if "transport" in run_sig.parameters else {}
     mcp.run(**kwargs)
 
 

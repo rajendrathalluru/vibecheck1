@@ -78,10 +78,35 @@ docker build -f mcp_server/Dockerfile -t vibecheck-mcp .
 Run:
 
 ```bash
-docker run --rm -p 8787:8787 \
+docker run --rm -p 8000:8000 \
   -e VIBECHECK_API_BASE=https://vibecheck1-257d3ab2.aedify.ai \
   vibecheck-mcp
 ```
+
+## AEDIFY deployment (recommended)
+
+If deploying as a monorepo component:
+
+- Base Directory: `mcp_server`
+- Dockerfile: `Dockerfile`
+- Environment:
+  - `PORT=8000`
+  - `MCP_HOST=0.0.0.0`
+  - `MCP_TRANSPORT=streamable-http`
+  - `MCP_PATH=/mcp`
+  - `VIBECHECK_API_BASE=https://vibecheck1-257d3ab2.aedify.ai`
+
+The server binds to `PORT` for HTTP transports, which avoids 502 errors on platforms
+that require a specific internal port.
+
+## Troubleshooting
+
+- `502 Bad Gateway`:
+  - Usually a bind-port mismatch. Ensure `PORT=8000` and redeploy.
+- `Invalid session ID` loops:
+  - Ensure one MCP replica (no multi-instance LB while testing).
+  - Ensure proxy/CDN preserves `mcp-session-id` request/response headers.
+  - Disable caching for `/mcp`.
 
 ## Cursor MCP config
 
