@@ -23,6 +23,7 @@
 
         <nav>
           <a class="nav-link" href="#quickstart">Search Quickstart</a>
+          <a class="nav-link" href="#tester">Try Endpoints</a>
           <a class="nav-link" href="#health">Health</a>
           <a class="nav-link" href="#assessments">Assessments</a>
           <a class="nav-link" href="#findings">Findings</a>
@@ -36,8 +37,19 @@
 
       <main class="docs-main">
         <section class="page-title">
-          <h2>Reference: VibeCheck API</h2>
-          <p>All endpoints, request shapes, and usage examples for lightweight and robust scans.</p>
+          <div>
+            <h2>Reference: VibeCheck API</h2>
+            <p>All endpoints, request shapes, and usage examples for lightweight and robust scans.</p>
+          </div>
+          <a class="dashboard-link" href="./index.html">
+            <span aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M10 6 4 12l6 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M20 12H5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+            </span>
+            Back to Dashboard
+          </a>
         </section>
 
         <section id="quickstart" class="quickstart">
@@ -49,6 +61,44 @@
     "mode": "lightweight",
     "repo_url": "https://github.com/vulnerable-apps/damn-vulnerable-MCP-server"
   }'</code></pre>
+        </section>
+
+        <section id="tester" class="api-tester">
+          <div class="tester-header">
+            <h4>Try Endpoints</h4>
+            <p>Run requests directly from docs to validate payloads and responses.</p>
+          </div>
+          <form id="testerForm">
+            <label for="testerBaseUrl">API Base URL</label>
+            <input id="testerBaseUrl" type="url" placeholder="https://vibecheck.aedify.ai" />
+
+            <div class="tester-row">
+              <div>
+                <label for="testerMethod">Method</label>
+                <select id="testerMethod">
+                  <option value="GET">GET</option>
+                  <option value="POST">POST</option>
+                  <option value="DELETE">DELETE</option>
+                </select>
+              </div>
+              <div class="tester-path-wrap">
+                <label for="testerPath">Path</label>
+                <input id="testerPath" type="text" placeholder="/v1/health" />
+              </div>
+            </div>
+
+            <label for="testerBody">JSON Body (for POST)</label>
+            <textarea id="testerBody" rows="8" placeholder='{"mode":"lightweight","repo_url":"https://github.com/org/repo"}'></textarea>
+
+            <div class="tester-actions">
+              <button type="submit">Send Request</button>
+              <button type="button" id="testerLoadHealth" class="secondary">Load Health Example</button>
+              <button type="button" id="testerLoadCreate" class="secondary">Load Create Assessment</button>
+            </div>
+          </form>
+
+          <p id="testerStatus" class="tester-status">Ready.</p>
+          <pre id="testerResponse"><code>Response output will appear here.</code></pre>
         </section>
 
         <h3 id="health" class="section-label">Health</h3>
@@ -282,5 +332,6 @@
         </article>
       </main>
     </div>
+    <script src="./docs.js"></script>
   </body>
 </html>

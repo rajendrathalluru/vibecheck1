@@ -91,6 +91,13 @@ html, body {
   width: 100%;
 }
 
+.page-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
 .page-title h2 {
   margin: 0 0 8px;
   font-family: "Space Grotesk", sans-serif;
@@ -100,6 +107,26 @@ html, body {
 .page-title p {
   margin: 0;
   color: var(--docs-muted);
+}
+
+.dashboard-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--docs-link);
+  border: 1px solid #cbd9ec;
+  background: #eef4fb;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.dashboard-link span {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
 }
 
 .endpoint {
@@ -195,6 +222,102 @@ pre {
   margin: 0 0 8px;
 }
 
+.api-tester {
+  margin-top: 20px;
+  background: var(--docs-panel);
+  border: 1px solid var(--docs-border);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.tester-header h4 {
+  margin: 0 0 6px;
+}
+
+.tester-header p {
+  margin: 0 0 12px;
+  color: var(--docs-muted);
+}
+
+#testerForm {
+  display: grid;
+  gap: 10px;
+}
+
+.tester-row {
+  display: grid;
+  grid-template-columns: 170px 1fr;
+  gap: 10px;
+}
+
+.tester-path-wrap {
+  min-width: 0;
+}
+
+.api-tester label {
+  display: block;
+  font-size: 12px;
+  color: var(--docs-muted);
+  margin-bottom: 5px;
+}
+
+.api-tester input,
+.api-tester select,
+.api-tester textarea {
+  width: 100%;
+  border: 1px solid #d4deeb;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.api-tester textarea {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  resize: vertical;
+}
+
+.api-tester input:focus,
+.api-tester select:focus,
+.api-tester textarea:focus {
+  outline: 2px solid rgba(12, 95, 153, 0.2);
+  border-color: var(--docs-link);
+}
+
+.tester-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tester-actions button {
+  border: 0;
+  border-radius: 9px;
+  padding: 9px 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tester-actions button[type="submit"] {
+  color: #fff;
+  background: linear-gradient(95deg, #0c5f99 0%, #0e8c79 100%);
+}
+
+.tester-actions .secondary {
+  background: #e9eef5;
+  color: #233352;
+}
+
+.tester-status {
+  margin: 12px 0 0;
+  color: var(--docs-muted);
+  font-size: 13px;
+}
+
+#testerResponse {
+  margin-top: 10px;
+}
+
 .section-label {
   margin-top: 34px;
   font-size: 18px;
@@ -215,5 +338,14 @@ pre {
 
   .docs-main {
     padding: 20px 16px 30px;
+  }
+
+  .page-title {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tester-row {
+    grid-template-columns: 1fr;
   }
 }

@@ -20,11 +20,22 @@
       <div>
         <p class="eyebrow">Security Orchestration</p>
         <h1>VibeCheck Control Center</h1>
-        <p class="muted"><a href="./docs.html">Open API Docs</a></p>
+        <p class="muted">
+          <a class="docs-entry-link" href="./docs.html" aria-label="Open API Docs">
+            <span class="docs-entry-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" role="img">
+                <path d="M6 3.5h8.6L19 7.9V20a.5.5 0 0 1-.5.5h-12A.5.5 0 0 1 6 20V3.5Z" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M14.5 3.5V8h4.5" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M9 12h6M9 15h6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+            </span>
+            Open API Docs
+          </a>
+        </p>
       </div>
       <div class="api-box">
         <label for="apiBase">API Base URL</label>
-        <input id="apiBase" type="text" value="http://localhost:8000" />
+        <input id="apiBase" type="text" value="http://localhost:8000" placeholder="https://vibecheck.aedify.ai" />
       </div>
     </header>
 

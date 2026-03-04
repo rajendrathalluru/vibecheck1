@@ -133,6 +133,36 @@ h2 {
   font-size: 13px;
 }
 
+.docs-entry-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: #214368;
+  font-weight: 600;
+}
+
+.docs-entry-link:hover {
+  color: var(--primary);
+}
+
+.docs-entry-icon {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid #c9d9ec;
+  background: #edf4fb;
+  color: #145a8f;
+}
+
+.docs-entry-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
 form {
   margin-top: 12px;
   display: grid;
