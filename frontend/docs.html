@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VibeCheck API Reference</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./docs.css" />
+  </head>
+  <body>
+    <div class="docs-shell">
+      <aside class="docs-sidebar">
+        <div class="brand">
+          <p>VibeCheck</p>
+          <h1>API Docs</h1>
+          <a href="./index.html">Open Dashboard</a>
+        </div>
+
+        <nav>
+          <a class="nav-link" href="#quickstart">Search Quickstart</a>
+          <a class="nav-link" href="#health">Health</a>
+          <a class="nav-link" href="#assessments">Assessments</a>
+          <a class="nav-link" href="#findings">Findings</a>
+          <a class="nav-link" href="#logs">Agent Logs</a>
+          <a class="nav-link" href="#agents">Agents</a>
+          <a class="nav-link" href="#memory">Memory</a>
+          <a class="nav-link" href="#tunnel">Tunnel</a>
+          <a class="nav-link" href="#errors">Error Format</a>
+        </nav>
+      </aside>
+
+      <main class="docs-main">
+        <section class="page-title">
+          <h2>Reference: VibeCheck API</h2>
+          <p>All endpoints, request shapes, and usage examples for lightweight and robust scans.</p>
+        </section>
+
+        <section id="quickstart" class="quickstart">
+          <h4>Search Quickstart</h4>
+          <p>Start a scan, then fetch findings and logs.</p>
+          <pre><code>curl -X POST https://vibecheck.aedify.ai/v1/assessments \
+  -H "content-type: application/json" \
+  -d '{
+    "mode": "lightweight",
+    "repo_url": "https://github.com/vulnerable-apps/damn-vulnerable-MCP-server"
+  }'</code></pre>
+        </section>
+
+        <h3 id="health" class="section-label">Health</h3>
+        <article class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/v1/health</span>
+            <h3>Health Check</h3>
+          </div>
+          <p>Returns API availability, version, active tunnel count, and agent readiness.</p>
+          <pre><code>{
+  "status": "healthy",
+  "version": "1.0.0",
+  "active_tunnels": 0,
+  "agents_available": true
+}</code></pre>
+        </article>
+
+        <h3 id="assessments" class="section-label">Assessments</h3>
+        <article class="endpoint">
+          <div class="endpoint-header">
+            <span class="method post">POST</span>
+            <span class="path">/v1/assessments</span>
+            <h3>Create Assessment</h3>
+          </div>
+          <p>Creates and queues either a lightweight static scan or a robust runtime scan.</p>
+          <div class="meta">
+            <div><strong>Mode:</strong> lightweight | robust</div>
+            <div><strong>Lightweight input:</strong> repo_url or files[]</div>
+            <div><strong>Robust input:</strong> target_url, agents[], depth</div>
+            <div><strong>Status:</strong> 202 Accepted (async processing)</div>
+          </div>
+          <pre><code>{
+  "mode": "robust",
+  "target_url": "https://demo.example.com",
+  "agents": ["recon", "auth", "injection", "config"],
+  "depth": "deep",
+  "idempotency_key": "scan-2026-03-03-001"
+}</code></pre>
+        </article>
+
+        <article class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/v1/assessments</span>
+            <h3>List Assessments</h3>
+          </div>
+          <p>Paginated list with filtering and sorting.</p>
+          <div class="meta">
+            <div><strong>Query:</strong> page, per_page, mode, status, sort</div>
+          </div>
+          <pre><code>curl "https://vibecheck.aedify.ai/v1/assessments?mode=robust&status=complete&sort=-created_at"</code></pre>
+        </article>
+
+        <article class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/v1/assessments/{assessment_id}</span>
+            <h3>Get Assessment</h3>
+          </div>
+          <p>Fetches one assessment object, status, counts, and links.</p>
+        </article>
+
+        <article class="endpoint">
+          <div class="endpoint-header">
+            <span class="method post">POST</span>
+            <span class="path">/v1/assessments/{assessment_id}/rerun</span>
+            <h3>Rerun Assessment</h3>
+          </div>
+          <p>Resets findings/logs and queues scan again. Only allowed when status is complete or failed.</p>
+        </article>
+
+        <article class="endpoint">
+          <div class="endpoint-header">
+            <span class="method delete">DELETE</span>
+            <span class="path">/v1/assessments/{assessment_id}</span>
+            <h3>Delete Assessment</h3>
+          </div>
+          <p>Deletes assessment and related findings/logs.</p>
+        </article>
+
+        <article class="endpoint">
+          <div class="endpoint-header">
+            <span class="method ws">WS</span>
+            <span class="path">/v1/assessments/{assessment_id}/ws</span>
+            <h3>Assessment Status Stream</h3>
+          </div>
+          <p>WebSocket stream for real-time status updates and terminal completion event.</p>
+          <pre><code>{
+  "type": "assessment_update",
+  "data": {
+    "id": "asm_xxx",
+    "status": "scanning",
+    "finding_counts": { "total": 4 }
+  }
+}</code></pre>
+        </article>
+
+        <h3 id="findings" class="section-label">Findings</h3>
+        <article class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/v1/assessments/{assessment_id}/findings</span>
+            <h3>List Findings</h3>
+          </div>
+          <p>Paginated findings for one assessment, filterable by severity, category, agent.</p>
+          <div class="meta">
+            <div><strong>Query:</strong> page, per_page, severity, category, agent, sort</div>
+          </div>
+        </article>
+
+        <article class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/v1/assessments/{assessment_id}/findings/{finding_id}</span>
+            <h3>Get Finding</h3>
+          </div>
+          <p>Returns one finding with severity, evidence, location, and remediation.</p>
+        </article>
+
+        <article class="endpoint">
+          <div class="endpoint-header">
+            <span class="method post">POST</span>
+            <span class="path">/v1/assessments/{assessment_id}/findings/{finding_id}/analyze</span>
+            <h3>Analyze Finding</h3>
+          </div>
+          <p>AI-enriched explanation for one finding: summary, impact, root cause, and action plan.</p>
+        </article>
+
+        <h3 id="logs" class="section-label">Agent Logs</h3>
+        <article class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/v1/assessments/{assessment_id}/logs</span>
+            <h3>List Agent Logs</h3>
+          </div>
+          <p>Returns robust mode reasoning/step logs. Lightweight mode returns logs_not_available.</p>
+          <div class="meta">
+            <div><strong>Query:</strong> page, per_page, agent</div>
+          </div>
+        </article>
+
+        <h3 id="agents" class="section-label">Agents</h3>
+        <article class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/v1/agents</span>
+            <h3>List Agents</h3>
+          </div>
+          <p>Returns available agents and supported categories for robust/lightweight modes.</p>
+        </article>
+
+        <article class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/v1/agents/{agent_name}</span>
+            <h3>Get Agent</h3>
+          </div>
+          <p>Returns one agent definition by name.</p>
+        </article>
+
+        <h3 id="memory" class="section-label">Memory</h3>
+        <article class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/v1/memory/status</span>
+            <h3>Memory Status</h3>
+          </div>
+          <p>Returns whether Supermemory integration is enabled.</p>
+        </article>
+
+        <article class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/v1/memory/search</span>
+            <h3>Search Memory</h3>
+          </div>
+          <p>Searches historical findings semantically with optional assessment scoping.</p>
+          <div class="meta">
+            <div><strong>Query:</strong> q, limit, assessment_id</div>
+          </div>
+        </article>
+
+        <h3 id="tunnel" class="section-label">Tunnel</h3>
+        <article class="endpoint">
+          <div class="endpoint-header">
+            <span class="method ws">WS</span>
+            <span class="path">/v1/tunnel</span>
+            <h3>Tunnel WebSocket</h3>
+          </div>
+          <p>Used by local client (`vibecheck connect`) to expose local app port for robust mode.</p>
+          <pre><code>{
+  "type": "connect",
+  "target_port": 3000
+}</code></pre>
+        </article>
+
+        <article class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/v1/tunnel/sessions</span>
+            <h3>List Tunnel Sessions</h3>
+          </div>
+          <p>Returns active and historical tunnel sessions.</p>
+        </article>
+
+        <article class="endpoint">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <span class="path">/v1/tunnel/sessions/{session_id}</span>
+            <h3>Get Tunnel Session</h3>
+          </div>
+          <p>Returns one tunnel session by ID.</p>
+        </article>
+
+        <h3 id="errors" class="section-label">Error Format</h3>
+        <article class="endpoint">
+          <div class="endpoint-header">
+            <span class="path">error envelope</span>
+            <h3>Consistent Error Payload</h3>
+          </div>
+          <p>All application errors follow this shape:</p>
+          <pre><code>{
+  "error": {
+    "type": "validation_error",
+    "message": "Mode must be 'lightweight' or 'robust'.",
+    "code": "INVALID_MODE",
+    "param": "mode"
+  }
+}</code></pre>
+        </article>
+      </main>
+    </div>
+  </body>
+</html>

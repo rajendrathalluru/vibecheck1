@@ -25,4 +25,5 @@ A lightweight dashboard for the VibeCheck API.
    - `python3 -m http.server 5173`
 3. Open:
    - `http://localhost:5173`
+   - API docs page: `http://localhost:5173/docs.html`
 4. If backend is elsewhere, change the `API Base URL` in the top-right field.
