@@ -35,7 +35,9 @@ function renderResponse(status, headers, bodyText) {
 async function runRequest(event) {
   event.preventDefault();
 
-  const baseUrl = normalizeBaseUrl(testerEls.baseUrl.value);
+  const fallbackOrigin =
+    window.location.origin && window.location.origin !== "null" ? window.location.origin : "";
+  const baseUrl = normalizeBaseUrl(testerEls.baseUrl.value) || fallbackOrigin;
   const method = testerEls.method.value;
   const path = testerEls.path.value.trim();
 
@@ -84,9 +86,6 @@ async function runRequest(event) {
 }
 
 function initDocsTester() {
-  const sameOrigin = window.location.origin && window.location.origin !== "null";
-  testerEls.baseUrl.value = sameOrigin ? window.location.origin : "https://vibecheck.aedify.ai";
-
   setExample("GET", "/v1/health", "");
 
   testerEls.form.addEventListener("submit", runRequest);

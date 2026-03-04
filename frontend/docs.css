@@ -1,5 +1,5 @@
 :root {
-  --docs-bg: #f4f7fb;
+  --docs-bg: #f3f7fb;
   --docs-panel: #ffffff;
   --docs-border: #dde5f0;
   --docs-text: #1b2433;
@@ -21,7 +21,10 @@
 html, body {
   margin: 0;
   padding: 0;
-  background: var(--docs-bg);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(12, 95, 153, 0.09), transparent 36%),
+    radial-gradient(circle at 100% 20%, rgba(14, 140, 121, 0.08), transparent 34%),
+    var(--docs-bg);
   color: var(--docs-text);
   font-family: "Plus Jakarta Sans", "Trebuchet MS", sans-serif;
 }
@@ -34,7 +37,7 @@ html, body {
 
 .docs-sidebar {
   border-right: 1px solid var(--docs-border);
-  background: linear-gradient(180deg, #eef4fb 0%, #f7fafc 100%);
+  background: linear-gradient(180deg, #edf4fb 0%, #f9fbfe 100%);
   padding: 20px 16px;
   position: sticky;
   top: 0;
@@ -44,9 +47,13 @@ html, body {
 
 .brand {
   margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid #d7e2f0;
+  border-radius: 12px;
+  padding: 12px;
 }
 
-.brand p {
+.brand-eyebrow {
   margin: 0;
   color: var(--docs-muted);
   font-size: 12px;
@@ -79,10 +86,12 @@ html, body {
   font-size: 14px;
   padding: 8px 10px;
   border-radius: 8px;
+  border: 1px solid transparent;
 }
 
 .docs-sidebar a.nav-link:hover {
-  background: #e8eff8;
+  background: #e9f1fb;
+  border-color: #cfdced;
 }
 
 .docs-main {
@@ -96,6 +105,11 @@ html, body {
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
+  background: var(--docs-panel);
+  border: 1px solid var(--docs-border);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 8px 26px rgba(27, 36, 51, 0.06);
 }
 
 .page-title h2 {
@@ -135,6 +149,7 @@ html, body {
   border: 1px solid var(--docs-border);
   border-radius: 14px;
   padding: 18px;
+  box-shadow: 0 8px 24px rgba(27, 36, 51, 0.05);
 }
 
 .endpoint-header {
@@ -204,6 +219,7 @@ pre {
   background: var(--docs-code-bg);
   color: var(--docs-code-text);
   border-radius: 10px;
+  border: 1px solid #1e2b46;
   padding: 14px;
   overflow-x: auto;
   font-size: 12px;
@@ -228,6 +244,7 @@ pre {
   border: 1px solid var(--docs-border);
   border-radius: 12px;
   padding: 16px;
+  box-shadow: 0 10px 30px rgba(27, 36, 51, 0.06);
 }
 
 .tester-header h4 {
@@ -237,6 +254,12 @@ pre {
 .tester-header p {
   margin: 0 0 12px;
   color: var(--docs-muted);
+}
+
+.field-hint {
+  margin: -2px 0 2px;
+  color: var(--docs-muted);
+  font-size: 12px;
 }
 
 #testerForm {
