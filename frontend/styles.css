@@ -116,11 +116,11 @@ h2 {
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
-  padding: 6px;
+  padding: 8px;
   border-radius: 12px;
   border: 1px solid #d5deec;
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow: 0 10px 24px rgba(17, 40, 74, 0.08);
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 12px 28px rgba(17, 40, 74, 0.12);
 }
 
 .view-link {
@@ -132,8 +132,9 @@ h2 {
   font-weight: 600;
   font-size: 13px;
   border-radius: 8px;
-  padding: 8px 12px;
+  padding: 9px 13px;
   border: 1px solid transparent;
+  transition: background 120ms ease, color 120ms ease;
 }
 
 .view-link:hover {
@@ -154,6 +155,46 @@ h2 {
 
 .panel-hidden {
   display: none;
+}
+
+.panel-overview-guide {
+  grid-column: span 12;
+}
+
+.overview-grid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.overview-card {
+  border: 1px solid #dbe2ef;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.75);
+  padding: 12px;
+}
+
+.overview-card h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.overview-card p {
+  margin: 8px 0 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.overview-link {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.overview-link:hover {
+  text-decoration: underline;
 }
 
 .panel {
@@ -531,6 +572,10 @@ canvas {
   }
 
   .chart-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .overview-grid {
     grid-template-columns: 1fr;
   }
 }

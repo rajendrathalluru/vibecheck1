@@ -105,7 +105,7 @@
         <p id="createStatus" class="status-line"></p>
       </section>
 
-      <section class="panel panel-stats" data-view="assessments">
+      <section class="panel panel-stats" data-view="overview">
         <h2>Assessment Snapshot</h2>
         <div class="stat-grid">
           <article class="stat-card">
@@ -123,6 +123,28 @@
           <article class="stat-card">
             <span>Failed</span>
             <strong id="statFailed">0</strong>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel panel-overview-guide" data-view="overview">
+        <h2>Workflow</h2>
+        <p class="muted">Run scans, inspect findings, and export evidence from one place.</p>
+        <div class="overview-grid">
+          <article class="overview-card">
+            <h3>1. Create</h3>
+            <p>Use lightweight mode for repo scanning, or robust mode for runtime testing.</p>
+            <a href="#create" class="overview-link">Go to Create</a>
+          </article>
+          <article class="overview-card">
+            <h3>2. Track</h3>
+            <p>Monitor queued/running/completed assessments and open a target assessment.</p>
+            <a href="#assessments" class="overview-link">Go to Assessments</a>
+          </article>
+          <article class="overview-card">
+            <h3>3. Analyze</h3>
+            <p>Filter findings, inspect details, run AI analysis, and export results.</p>
+            <a href="#findings" class="overview-link">Go to Findings</a>
           </article>
         </div>
       </section>

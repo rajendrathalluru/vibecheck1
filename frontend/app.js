@@ -89,11 +89,10 @@ function getCurrentView() {
 
 function applyView(view) {
   const activeView = viewNames[view] ? view : "overview";
-  const showAll = activeView === "overview";
 
   viewSections.forEach((section) => {
     const sectionView = section.getAttribute("data-view");
-    const visible = showAll || sectionView === activeView;
+    const visible = sectionView === activeView;
     section.classList.toggle("panel-hidden", !visible);
   });
 
