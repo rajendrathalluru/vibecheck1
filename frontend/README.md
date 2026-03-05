@@ -24,7 +24,7 @@ A lightweight dashboard for the VibeCheck API.
 2. Serve frontend (from `/Users/rajendrathalluru/Documents/Hackathon/VibeCheck/frontend`):
    - `python3 -m http.server 5173`
 3. Open:
-   - `http://localhost:5173`
+   - React dashboard: `http://localhost:5173`
    - API docs page: `http://localhost:5173/docs.html`
-   - React dashboard (alternative UI): `http://localhost:5173/react.html`
+   - Direct React page: `http://localhost:5173/react.html`
 4. If backend is elsewhere, change the `API Base URL` in the top-right field.

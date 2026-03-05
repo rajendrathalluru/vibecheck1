@@ -200,6 +200,18 @@ button {
   width: auto;
 }
 
+.pager {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+
+.pager button {
+  width: auto;
+}
+
 .filters {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -326,10 +338,11 @@ tbody tr:hover {
 
   .row .actions {
     width: 100%;
+    flex-wrap: wrap;
   }
 
   .row .actions button {
-    flex: 1;
+    flex: 1 1 42%;
   }
 
   .filters {
@@ -352,6 +365,10 @@ tbody tr:hover {
 
   .stats {
     grid-template-columns: 1fr;
+  }
+
+  .pager {
+    justify-content: space-between;
   }
 
   .card {
