@@ -31,6 +31,7 @@
             </span>
             Open API Docs
           </a>
+          <a class="docs-entry-link react-entry-link" href="./react.html" aria-label="Open React Dashboard">React Dashboard</a>
         </p>
       </div>
       <div class="api-box">
@@ -39,19 +40,8 @@
       </div>
     </header>
 
-    <section class="view-nav-wrap">
-      <div class="view-nav" aria-label="Dashboard Views">
-        <a class="view-link" href="#overview">Overview</a>
-        <a class="view-link" href="#create">Create</a>
-        <a class="view-link" href="#assessments">Assessments</a>
-        <a class="view-link" href="#findings">Findings</a>
-        <a class="view-link" href="#analytics">Analytics</a>
-      </div>
-      <p class="view-hint">Current View: <span id="activeViewLabel">Overview</span></p>
-    </section>
-
     <main class="layout">
-      <section class="panel panel-create" data-view="create">
+      <section class="panel panel-create">
         <h2>Create Assessment</h2>
         <p class="muted">Choose lightweight or robust mode and submit.</p>
 
@@ -105,7 +95,7 @@
         <p id="createStatus" class="status-line"></p>
       </section>
 
-      <section class="panel panel-stats" data-view="overview">
+      <section class="panel panel-stats">
         <h2>Assessment Snapshot</h2>
         <div class="stat-grid">
           <article class="stat-card">
@@ -127,29 +117,7 @@
         </div>
       </section>
 
-      <section class="panel panel-overview-guide" data-view="overview">
-        <h2>Workflow</h2>
-        <p class="muted">Run scans, inspect findings, and export evidence from one place.</p>
-        <div class="overview-grid">
-          <article class="overview-card">
-            <h3>1. Create</h3>
-            <p>Use lightweight mode for repo scanning, or robust mode for runtime testing.</p>
-            <a href="#create" class="overview-link">Go to Create</a>
-          </article>
-          <article class="overview-card">
-            <h3>2. Track</h3>
-            <p>Monitor queued/running/completed assessments and open a target assessment.</p>
-            <a href="#assessments" class="overview-link">Go to Assessments</a>
-          </article>
-          <article class="overview-card">
-            <h3>3. Analyze</h3>
-            <p>Filter findings, inspect details, run AI analysis, and export results.</p>
-            <a href="#findings" class="overview-link">Go to Findings</a>
-          </article>
-        </div>
-      </section>
-
-      <section class="panel panel-assessments" data-view="assessments">
+      <section class="panel panel-assessments">
         <div class="section-header">
           <h2>Assessments</h2>
           <div class="row-actions">
@@ -179,7 +147,7 @@
         </div>
       </section>
 
-      <section class="panel panel-findings" data-view="findings">
+      <section class="panel panel-findings">
         <div class="section-header">
           <h2>Findings Grid</h2>
           <div class="row-actions">
@@ -234,7 +202,7 @@
         </div>
       </section>
 
-      <section class="panel panel-details" data-view="findings">
+      <section class="panel panel-details">
         <div class="section-header">
           <h2>Finding Detail</h2>
           <div class="row-actions">
@@ -245,7 +213,7 @@
         <pre id="findingDetail">Select a finding row to inspect full details.</pre>
       </section>
 
-      <section class="panel panel-charts" data-view="analytics">
+      <section class="panel panel-charts">
         <h2>Security Analytics</h2>
         <div class="chart-grid">
           <article class="chart-card">

@@ -26,4 +26,5 @@ A lightweight dashboard for the VibeCheck API.
 3. Open:
    - `http://localhost:5173`
    - API docs page: `http://localhost:5173/docs.html`
+   - React dashboard (alternative UI): `http://localhost:5173/react.html`
 4. If backend is elsewhere, change the `API Base URL` in the top-right field.
