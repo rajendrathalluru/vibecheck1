@@ -33,8 +33,16 @@ function csvCell(value) {
   return `"${String(value).replace(/"/g, "\"\"")}"`;
 }
 
+function getDefaultApiBase() {
+  const host = window.location.hostname;
+  const isLocal = host === "localhost" || host === "127.0.0.1";
+  if (isLocal) return "http://127.0.0.1:8000";
+  if (window.location.origin && window.location.origin !== "null") return window.location.origin;
+  return "http://127.0.0.1:8000";
+}
+
 function App() {
-  const [apiBase, setApiBase] = useState("http://127.0.0.1:8000");
+  const [apiBase, setApiBase] = useState(getDefaultApiBase);
   const [status, setStatus] = useState("Ready.");
   const [autoPoll, setAutoPoll] = useState(false);
   const [mode, setMode] = useState("lightweight");
@@ -57,7 +65,9 @@ function App() {
   const statusTone = /failed|error/i.test(status) ? "error" : /complete|exported|queued/i.test(status) ? "ok" : "info";
 
   async function apiFetch(path, options = {}) {
-    const url = `${apiBase.trim().replace(/\/$/, "")}${path}`;
+    const base = apiBase.trim().replace(/\/$/, "");
+    if (!base) throw new Error("API Base URL is empty.");
+    const url = `${base}${path}`;
     const response = await fetch(url, {
       headers: { "Content-Type": "application/json", ...(options.headers || {}) },
       ...options,
