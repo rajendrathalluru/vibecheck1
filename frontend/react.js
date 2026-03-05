@@ -34,6 +34,10 @@ function csvCell(value) {
 }
 
 function getDefaultApiBase() {
+  const fromQuery = new URLSearchParams(window.location.search).get("api_base");
+  if (fromQuery) return fromQuery.trim();
+  const fromStorage = window.localStorage.getItem("vibecheck_api_base");
+  if (fromStorage) return fromStorage.trim();
   const host = window.location.hostname;
   const isLocal = host === "localhost" || host === "127.0.0.1";
   if (isLocal) return "http://127.0.0.1:8000";
@@ -64,8 +68,8 @@ function App() {
   const [severity, setSeverity] = useState("");
   const statusTone = /failed|error/i.test(status) ? "error" : /complete|exported|queued/i.test(status) ? "ok" : "info";
 
-  async function apiFetch(path, options = {}) {
-    const base = apiBase.trim().replace(/\/$/, "");
+  async function apiFetch(path, options = {}, baseOverride = null) {
+    const base = (baseOverride || apiBase).trim().replace(/\/$/, "");
     if (!base) throw new Error("API Base URL is empty.");
     const url = `${base}${path}`;
     const response = await fetch(url, {
@@ -86,21 +90,57 @@ function App() {
     return response.json();
   }
 
-  async function loadAssessments() {
-    const payload = await apiFetch("/v1/assessments?per_page=50&sort=-created_at");
+  async function loadAssessments(baseOverride = null) {
+    const payload = await apiFetch("/v1/assessments?per_page=50&sort=-created_at", {}, baseOverride);
     const items = payload.items || [];
     setAssessments(items);
     if (selectedAssessmentId && items.some((i) => i.id === selectedAssessmentId)) return;
     if (items.length) setSelectedAssessmentId(items[0].id);
   }
 
-  async function loadFindings(assessmentId) {
+  async function loadFindings(assessmentId, baseOverride = null) {
     if (!assessmentId) return;
-    const payload = await apiFetch(`/v1/assessments/${assessmentId}/findings?per_page=200&sort=severity`);
+    const payload = await apiFetch(
+      `/v1/assessments/${assessmentId}/findings?per_page=200&sort=severity`,
+      {},
+      baseOverride,
+    );
     const items = payload.items || [];
     setFindings(items);
     setSelectedFinding(null);
     setFindingPage(1);
+  }
+
+  async function resolveApiBaseAndLoad() {
+    const current = apiBase.trim().replace(/\/$/, "");
+    const candidates = [];
+    if (current) candidates.push(current);
+    if (window.location.origin && window.location.origin !== "null") {
+      const origin = window.location.origin.replace(/\/$/, "");
+      if (!candidates.includes(origin)) candidates.push(origin);
+      const originApi = `${origin}/api`;
+      if (!candidates.includes(originApi)) candidates.push(originApi);
+    }
+    const stored = window.localStorage.getItem("vibecheck_api_base");
+    if (stored) {
+      const s = stored.trim().replace(/\/$/, "");
+      if (s && !candidates.includes(s)) candidates.push(s);
+    }
+
+    let lastError = null;
+    for (const candidate of candidates) {
+      try {
+        await apiFetch("/v1/health", {}, candidate);
+        setApiBase(candidate);
+        window.localStorage.setItem("vibecheck_api_base", candidate);
+        await loadAssessments(candidate);
+        return;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw lastError || new Error("Could not resolve API base.");
   }
 
   async function createAssessment(event) {
@@ -215,9 +255,16 @@ function App() {
   }
 
   useEffect(() => {
-    loadAssessments().catch((error) => setStatus(`Initial load failed: ${error.message}`));
+    resolveApiBaseAndLoad().catch((error) => setStatus(`Initial load failed: ${error.message}`));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const base = apiBase.trim();
+    if (base) {
+      window.localStorage.setItem("vibecheck_api_base", base);
+    }
+  }, [apiBase]);
 
   useEffect(() => {
     if (!selectedAssessmentId) return;
