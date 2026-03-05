@@ -18,6 +18,7 @@ const state = {
 
 const els = {
   apiBase: document.getElementById("apiBase"),
+  activeViewLabel: document.getElementById("activeViewLabel"),
   createForm: document.getElementById("createForm"),
   scanMode: document.getElementById("scanMode"),
   lightweightFields: document.getElementById("lightweightFields"),
@@ -61,6 +62,14 @@ const els = {
 };
 
 let selectedFindingId = null;
+const viewSections = Array.from(document.querySelectorAll("[data-view]"));
+const viewNames = {
+  overview: "Overview",
+  create: "Create",
+  assessments: "Assessments",
+  findings: "Findings",
+  analytics: "Analytics",
+};
 
 function getApiBase() {
   return els.apiBase.value.trim().replace(/\/$/, "");
@@ -71,6 +80,35 @@ function getWsBase() {
   if (apiBase.startsWith("https://")) return `wss://${apiBase.slice("https://".length)}`;
   if (apiBase.startsWith("http://")) return `ws://${apiBase.slice("http://".length)}`;
   return apiBase.replace(/^http/, "ws");
+}
+
+function getCurrentView() {
+  const hashValue = (window.location.hash || "").replace(/^#/, "").toLowerCase();
+  return viewNames[hashValue] ? hashValue : "overview";
+}
+
+function applyView(view) {
+  const activeView = viewNames[view] ? view : "overview";
+  const showAll = activeView === "overview";
+
+  viewSections.forEach((section) => {
+    const sectionView = section.getAttribute("data-view");
+    const visible = showAll || sectionView === activeView;
+    section.classList.toggle("panel-hidden", !visible);
+  });
+
+  document.querySelectorAll(".view-link").forEach((link) => {
+    const target = (link.getAttribute("href") || "").replace(/^#/, "").toLowerCase();
+    link.classList.toggle("active", target === activeView);
+  });
+
+  if (els.activeViewLabel) {
+    els.activeViewLabel.textContent = viewNames[activeView];
+  }
+
+  if (activeView === "analytics") {
+    renderCharts();
+  }
 }
 
 async function apiFetch(path, options = {}) {
@@ -905,6 +943,7 @@ function setupEvents() {
   });
 
   window.addEventListener("resize", renderCharts);
+  window.addEventListener("hashchange", () => applyView(getCurrentView()));
   window.addEventListener("beforeunload", closeAssessmentSocket);
 }
 
@@ -915,6 +954,7 @@ async function boot() {
   }
 
   setupEvents();
+  applyView(getCurrentView());
   setCreateModeUI();
 
   try {

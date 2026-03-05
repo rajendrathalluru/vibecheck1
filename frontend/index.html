@@ -39,8 +39,19 @@
       </div>
     </header>
 
+    <section class="view-nav-wrap">
+      <div class="view-nav" aria-label="Dashboard Views">
+        <a class="view-link" href="#overview">Overview</a>
+        <a class="view-link" href="#create">Create</a>
+        <a class="view-link" href="#assessments">Assessments</a>
+        <a class="view-link" href="#findings">Findings</a>
+        <a class="view-link" href="#analytics">Analytics</a>
+      </div>
+      <p class="view-hint">Current View: <span id="activeViewLabel">Overview</span></p>
+    </section>
+
     <main class="layout">
-      <section class="panel panel-create">
+      <section class="panel panel-create" data-view="create">
         <h2>Create Assessment</h2>
         <p class="muted">Choose lightweight or robust mode and submit.</p>
 
@@ -94,7 +105,7 @@
         <p id="createStatus" class="status-line"></p>
       </section>
 
-      <section class="panel panel-stats">
+      <section class="panel panel-stats" data-view="assessments">
         <h2>Assessment Snapshot</h2>
         <div class="stat-grid">
           <article class="stat-card">
@@ -116,7 +127,7 @@
         </div>
       </section>
 
-      <section class="panel panel-assessments">
+      <section class="panel panel-assessments" data-view="assessments">
         <div class="section-header">
           <h2>Assessments</h2>
           <div class="row-actions">
@@ -146,7 +157,7 @@
         </div>
       </section>
 
-      <section class="panel panel-findings">
+      <section class="panel panel-findings" data-view="findings">
         <div class="section-header">
           <h2>Findings Grid</h2>
           <div class="row-actions">
@@ -201,7 +212,7 @@
         </div>
       </section>
 
-      <section class="panel panel-details">
+      <section class="panel panel-details" data-view="findings">
         <div class="section-header">
           <h2>Finding Detail</h2>
           <div class="row-actions">
@@ -212,7 +223,7 @@
         <pre id="findingDetail">Select a finding row to inspect full details.</pre>
       </section>
 
-      <section class="panel panel-charts">
+      <section class="panel panel-charts" data-view="analytics">
         <h2>Security Analytics</h2>
         <div class="chart-grid">
           <article class="chart-card">
