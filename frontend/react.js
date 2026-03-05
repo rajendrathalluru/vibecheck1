@@ -54,6 +54,7 @@ function App() {
   const findingPerPage = 12;
   const [search, setSearch] = useState("");
   const [severity, setSeverity] = useState("");
+  const statusTone = /failed|error/i.test(status) ? "error" : /complete|exported|queued/i.test(status) ? "ok" : "info";
 
   async function apiFetch(path, options = {}) {
     const url = `${apiBase.trim().replace(/\/$/, "")}${path}`;
@@ -276,11 +277,15 @@ function App() {
         <div>
           <p className="eyebrow">Security Orchestration</p>
           <h1>VibeCheck Control Center</h1>
-          <p className="muted">React dashboard (production view).</p>
+          <p className="muted">AI-assisted security scanning for code repositories and running applications.</p>
+          <div className="hero-metrics">
+            <span className="hero-pill">Assessments: ${stats.total}</span>
+            <span className="hero-pill">Active: ${stats.active}</span>
+            <span className="hero-pill">Selected: ${selectedAssessmentId || "none"}</span>
+          </div>
         </div>
         <div className="top-links">
           <a className="link-btn" href="./docs.html">API Docs</a>
-          <a className="link-btn" href="/docs">FastAPI Swagger</a>
         </div>
       </header>
 
@@ -346,7 +351,7 @@ function App() {
                 `}
             <button type="submit">Start Assessment</button>
           </form>
-          <p className="status">${status}</p>
+          <p className=${`status ${statusTone}`}>${status}</p>
         </section>
 
         <section className="stack">
@@ -389,7 +394,11 @@ function App() {
                 <tbody>
                   ${pagedAssessments.rows.map(
                     (a) => html`
-                      <tr key=${a.id} onClick=${() => setSelectedAssessmentId(a.id)}>
+                      <tr
+                        key=${a.id}
+                        className=${selectedAssessmentId === a.id ? "row-selected" : ""}
+                        onClick=${() => setSelectedAssessmentId(a.id)}
+                      >
                         <td>${a.id}</td>
                         <td>${a.mode}</td>
                         <td><span className=${`badge ${badgeClass("st", a.status)}`}>${a.status || "-"}</span></td>
@@ -453,7 +462,11 @@ function App() {
                 <tbody>
                   ${pagedFindings.map(
                     (f) => html`
-                      <tr key=${f.id} onClick=${() => setSelectedFinding(f)}>
+                      <tr
+                        key=${f.id}
+                        className=${selectedFinding?.id === f.id ? "row-selected" : ""}
+                        onClick=${() => setSelectedFinding(f)}
+                      >
                         <td><span className=${`badge ${badgeClass("sev", f.severity)}`}>${f.severity || "-"}</span></td>
                         <td>${f.category || "-"}</td>
                         <td>${f.title || "-"}</td>

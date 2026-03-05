@@ -1,11 +1,12 @@
 :root {
-  --bg: #eff4fa;
+  --bg: #edf3fb;
   --panel: #ffffff;
   --text: #1d2433;
   --muted: #5d6882;
   --primary: #0e5f9b;
   --primary2: #0f8f7a;
   --border: #d8e2ee;
+  --ink-soft: #2b3f5d;
 }
 
 * {
@@ -34,7 +35,12 @@ body {
   justify-content: space-between;
   align-items: flex-end;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 12px 28px rgba(17, 40, 74, 0.08);
 }
 
 .eyebrow {
@@ -61,10 +67,29 @@ h1 {
   gap: 8px;
 }
 
+.hero-metrics {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #cfdded;
+  border-radius: 999px;
+  background: #eff5fd;
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+}
+
 .link-btn {
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: #eef4fb;
+  background: linear-gradient(180deg, #f6f9fd 0%, #edf4fb 100%);
   color: #244266;
   text-decoration: none;
   font-weight: 600;
@@ -82,7 +107,7 @@ h1 {
 .card {
   border: 1px solid var(--border);
   border-radius: 16px;
-  background: var(--panel);
+  background: linear-gradient(180deg, #ffffff 0%, #fcfdff 100%);
   box-shadow: 0 16px 36px rgba(17, 40, 74, 0.08);
   padding: 14px;
   min-width: 0;
@@ -150,6 +175,26 @@ button {
   color: var(--muted);
   font-size: 13px;
   margin-top: 10px;
+  border-radius: 10px;
+  border: 1px solid #dce7f4;
+  background: #f5f9ff;
+  padding: 8px 10px;
+}
+
+.status.info {
+  color: #264061;
+}
+
+.status.ok {
+  color: #166534;
+  border-color: #cce8d8;
+  background: #f1fbf5;
+}
+
+.status.error {
+  color: #b42318;
+  border-color: #f0d0cd;
+  background: #fff5f4;
 }
 
 .stack {
@@ -249,6 +294,10 @@ tbody tr:hover {
   cursor: pointer;
 }
 
+tbody tr.row-selected {
+  background: rgba(14, 95, 155, 0.13);
+}
+
 .badge {
   display: inline-block;
   border-radius: 999px;
@@ -304,6 +353,7 @@ tbody tr:hover {
   font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
   font-size: 12px;
   white-space: pre-wrap;
+  color: #223249;
 }
 
 @media (max-width: 1080px) {
